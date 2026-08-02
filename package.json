@@ -1,0 +1,31 @@
+{
+  "name": "@maindala/telemetry",
+  "version": "0.1.1",
+  "description": "Free, zero-setup live telemetry for AI agents — metadata-only tool-call events, streamed live with `npx maindala tail`",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": ["maindala", "observability", "telemetry", "agent", "llm", "mcp"],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maindala/maindala-telemetry.git"
+  },
+  "homepage": "https://github.com/maindala/maindala-telemetry#readme",
+  "bugs": {
+    "url": "https://github.com/maindala/maindala-telemetry/issues"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4"
+  }
+}
