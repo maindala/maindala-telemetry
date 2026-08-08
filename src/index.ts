@@ -47,15 +47,41 @@ export async function pushToolCallTelemetry(
   event: ToolCallTelemetryEvent,
   gatewayUrl: string = DEFAULT_GATEWAY_URL,
 ): Promise<void> {
+  // Build the outbound body by explicitly picking the known fields, rather
+  // than serializing `event` as-is. TypeScript's structural typing only
+  // constrains callers at compile time — it does not stop a spread
+  // (`{ ...internalEvent }`) or an untyped JS caller from attaching extra
+  // properties, and JSON.stringify would forward whatever is actually
+  // present on the object at runtime. This is what makes the metadata-only
+  // guarantee true by construction on the client, rather than depending on
+  // the server's own allowlist to catch what shouldn't have been sent.
+  const safeEvent: ToolCallTelemetryEvent = {
+    kind:     event.kind,
+    toolName: event.toolName,
+    target:   event.target,
+    ...(event.latencyMs !== undefined ? { latencyMs: event.latencyMs } : {}),
+    ...(event.decision !== undefined ? { decision: event.decision } : {}),
+    ...(event.findingClasses !== undefined ? { findingClasses: event.findingClasses } : {}),
+  };
+  const droppedKeys = Object.keys(event).filter(
+    (k) => !['kind', 'toolName', 'target', 'latencyMs', 'decision', 'findingClasses'].includes(k),
+  );
+  if (droppedKeys.length > 0) {
+    console.warn(`[@maindala/telemetry] dropped non-metadata field(s) before sending: ${droppedKeys.join(', ')}`);
+  }
+
   try {
-    await fetch(`${gatewayUrl.replace(/\/$/, '')}/telemetry/ingest`, {
+    const res = await fetch(`${gatewayUrl.replace(/\/$/, '')}/telemetry/ingest`, {
       method:  'POST',
       headers: {
         'Content-Type':  'application/json',
         'Authorization': `Bearer ${token}`,
       },
-      body: JSON.stringify(event),
+      body: JSON.stringify(safeEvent),
     });
+    if (!res.ok) {
+      console.warn(`[@maindala/telemetry] event was not accepted (HTTP ${res.status}) — it was not delivered`);
+    }
   } catch {
     // telemetry loss is acceptable — never throw from this function
   }
