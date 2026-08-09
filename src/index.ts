@@ -32,6 +32,56 @@ export interface ToolCallTelemetryEvent {
 
 const DEFAULT_GATEWAY_URL = 'https://mcp.maindala.com';
 
+// Validation limits, mirrored from mcp-gateway's validateTelemetryIngestBody()
+// — that function is the source of truth for the wire contract. They're
+// duplicated rather than imported because this package is deliberately
+// standalone and dependency-free (that's its whole design point), matching the
+// per-package-duplication convention used elsewhere in this codebase. If the
+// gateway's limits change, change them here too.
+const KINDS = ['tool_call', 'a2a_call'] as const;
+const DECISIONS = ['allow', 'deny', 'redact', 'flag', 'observed'] as const;
+const MAX_STRING_FIELD_LEN = 200;
+const MAX_FINDING_CLASSES = 10;
+const MAX_FINDING_CLASS_LEN = 50;
+
+// Returns an error string describing the first rule the event breaks, or null
+// if it's valid. Checks the VALUES of the allowed fields — the field allowlist
+// below only controls which keys are forwarded, so without this an untyped JS
+// caller or a spread could still put arbitrary-length arbitrary content into
+// `findingClasses`, `toolName`, etc. and it would reach the wire before the
+// server's own allowlist rejected it. Validating here is what makes the
+// metadata-only guarantee true at the value level, not just the key level.
+function validateEvent(event: ToolCallTelemetryEvent): string | null {
+  if (!KINDS.includes(event.kind)) {
+    return `\`kind\` must be one of: ${KINDS.join(', ')}`;
+  }
+  for (const field of ['toolName', 'target'] as const) {
+    const value = event[field];
+    if (typeof value !== 'string' || value.length === 0 || value.length > MAX_STRING_FIELD_LEN) {
+      return `\`${field}\` must be a non-empty string up to ${MAX_STRING_FIELD_LEN} chars`;
+    }
+  }
+  if (event.latencyMs !== undefined) {
+    if (typeof event.latencyMs !== 'number' || !Number.isFinite(event.latencyMs) || event.latencyMs < 0) {
+      return '`latencyMs` must be a non-negative finite number';
+    }
+  }
+  if (event.decision !== undefined && !DECISIONS.includes(event.decision)) {
+    return `\`decision\` must be one of: ${DECISIONS.join(', ')}`;
+  }
+  if (event.findingClasses !== undefined) {
+    if (!Array.isArray(event.findingClasses) || event.findingClasses.length > MAX_FINDING_CLASSES) {
+      return `\`findingClasses\` must be an array of at most ${MAX_FINDING_CLASSES} strings`;
+    }
+    for (const c of event.findingClasses) {
+      if (typeof c !== 'string' || c.length === 0 || c.length > MAX_FINDING_CLASS_LEN) {
+        return `\`findingClasses\` entries must be non-empty strings up to ${MAX_FINDING_CLASS_LEN} chars (class names only, never matched content)`;
+      }
+    }
+  }
+  return null;
+}
+
 /**
  * Pushes a single metadata-only tool-call/A2A-delegation event to your free
  * mAIndala telemetry stream. Fire-and-forget: never throws, so a network hiccup
@@ -68,6 +118,17 @@ export async function pushToolCallTelemetry(
   );
   if (droppedKeys.length > 0) {
     console.warn(`[@maindala/telemetry] dropped non-metadata field(s) before sending: ${droppedKeys.join(', ')}`);
+  }
+
+  // Reject the whole event rather than salvaging the valid fields: the server
+  // rejects the entire request, so anything less would leave client and server
+  // disagreeing about what a valid event is — which is the defect this fixes.
+  // Warn and return; never throw. Callers run this inside their own agent loop
+  // and the never-throws contract above is load-bearing.
+  const invalid = validateEvent(safeEvent);
+  if (invalid) {
+    console.warn(`[@maindala/telemetry] event not sent — ${invalid}`);
+    return;
   }
 
   try {
