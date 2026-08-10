@@ -44,6 +44,10 @@ Events are also **ephemeral**: the free tier keeps the last 500 events / 1 hour
 (whichever comes first), then they're gone. Short-lived by design, both a
 feature and a cost/privacy control.
 
+See [`DATA.md`](./DATA.md) for the full, verified account of what's stored,
+where, for how long, what's provably never sent, and how to point this at
+your own self-hosted sink instead of mAIndala's hosted gateway.
+
 ## Framework quickstarts
 
 The API is one plain async function — call it right after any tool call
