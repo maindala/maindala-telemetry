@@ -1,5 +1,7 @@
 # @maindala/telemetry
 
+[![CI](https://github.com/maindala/maindala-telemetry/actions/workflows/ci.yml/badge.svg)](https://github.com/maindala/maindala-telemetry/actions/workflows/ci.yml)
+
 Free, zero-setup live telemetry for AI agents. See exactly what your agent's tool
 calls are doing, in real time, with one command — no account, no org, no config.
 
