@@ -143,6 +143,12 @@ The token is read from the environment only — it's never typed or shown in the
 be a real project's token. See `assets/demo.tape` for the full capture script and `assets/emit-demo-events.mjs`
 for the real events it streams in (via the live ingest endpoint — not faked terminal output).
 
+## Releasing
+
+See [RELEASING.md](./RELEASING.md) — publishing runs through a GitHub Release +
+trusted-publishing CI workflow with a required-reviewer approval gate, not a local
+`npm publish`.
+
 ## License
 
 MIT
