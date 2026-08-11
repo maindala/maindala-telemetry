@@ -6,7 +6,7 @@ against the versions actually live on npm
 (`npm view @maindala/telemetry versions`/`time`, checked 2026-08-09) — every
 version below is confirmed live; none are guessed.
 
-## [0.1.6] - Unreleased
+## [0.1.6] - 2026-08-11
 
 ### No functional change
 Comment- and documentation-only fix, published to obtain a real npm provenance
@@ -16,6 +16,15 @@ the new trusted-publishing workflow — this package has none yet). A source com
 by its private codename; genericized to "the gateway" — that is the entire diff.
 `pushToolCallTelemetry()`'s behavior, request shape, and validation are unchanged from
 `0.1.5`. (QFX-2)
+
+Date corrected after the fact (confirmed via `npm view @maindala/telemetry time --json`,
+not guessed) — this repo had the identical "published as Unreleased" defect found and
+fixed in `@maindala/agent-guard`'s `1.0.1` (this heading was still "Unreleased" while
+`0.1.6` was already live on npm). **The published `0.1.6` tarball on npm still contains
+this heading as "Unreleased"** — `CHANGELOG.md` ships inside the tarball built at publish
+time, and npm versions are immutable, so that copy can never be corrected. Only this repo
+copy, and only going forward (via the new `scripts/check-changelog-date.mjs` release
+gate — see RELEASING.md), is fixed.
 
 ## [0.1.5] - 2026-08-10
 
