@@ -32,7 +32,7 @@ export interface ToolCallTelemetryEvent {
 
 const DEFAULT_GATEWAY_URL = 'https://mcp.maindala.com';
 
-// Validation limits, mirrored from mcp-gateway's validateTelemetryIngestBody()
+// Validation limits, mirrored from the gateway's validateTelemetryIngestBody()
 // — that function is the source of truth for the wire contract. They're
 // duplicated rather than imported because this package is deliberately
 // standalone and dependency-free (that's its whole design point), matching the

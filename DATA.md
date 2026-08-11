@@ -142,7 +142,7 @@ check) and its own persistence.
 ## Verification
 
 Run locally against local dev infrastructure (`docker compose` Postgres +
-Redis, real `catalog-service` and `mcp-gateway` processes) on 2026-08-09:
+Redis, real catalog and gateway processes) on 2026-08-09:
 
 - **Round-trip verified**: a real `POST /telemetry-signup` → `POST
   /telemetry/ingest` → direct `redis-cli LRANGE`/`TTL`/`LLEN` inspection

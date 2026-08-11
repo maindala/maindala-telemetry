@@ -1,6 +1,6 @@
 {
   "name": "@maindala/telemetry",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "Free, zero-setup live telemetry for AI agents — metadata-only tool-call events, streamed live with `npx maindala tail`",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -6,11 +6,22 @@ against the versions actually live on npm
 (`npm view @maindala/telemetry versions`/`time`, checked 2026-08-09) — every
 version below is confirmed live; none are guessed.
 
+## [0.1.6] - Unreleased
+
+### No functional change
+Comment- and documentation-only fix, published to obtain a real npm provenance
+attestation for this package (attestations only exist on versions published through
+the new trusted-publishing workflow — this package has none yet). A source comment in
+`src/index.ts` and a line in `DATA.md`'s verification section named an internal service
+by its private codename; genericized to "the gateway" — that is the entire diff.
+`pushToolCallTelemetry()`'s behavior, request shape, and validation are unchanged from
+`0.1.5`. (QFX-2)
+
 ## [0.1.5] - 2026-08-10
 
 ### Added
 - `DATA.md`: what is stored, where, for how long, and what is provably
-  never sent — every claim verified against the real mcp-gateway
+  never sent — every claim verified against the real gateway
   implementation, with a round-trip-verified vs. code-verified-only
   distinction for each one. States plainly that this is not an audit
   log and not compliance evidence.
@@ -41,7 +52,7 @@ version below is confirmed live; none are guessed.
 - Value validation for every field `pushToolCallTelemetry` sends —
   `kind`/`decision` enum membership, `toolName`/`target` length caps,
   `findingClasses` array-size and per-entry length caps — mirroring
-  `mcp-gateway`'s `validateTelemetryIngestBody()` exactly. Previously the
+  the gateway's `validateTelemetryIngestBody()` exactly. Previously the
   client only enforced *which keys* were forwarded (added in `0.1.2`), not
   whether their *values* were within the bounds the server enforces, so an
   out-of-range value (e.g. an 11-entry `findingClasses` array) would reach
